@@ -158,7 +158,7 @@ const App = (props) => {
         <div className="author">
           Designed and coded By 
           <br/>
-          <a href="https://www.freecodecamp.org/no-stack-dub-sack" target="_blank" rel="noreferrer">Peter Weinberg</a>
+          <a href="https://www.freecodecamp.org/no-stack-dub-sack" rel="noreferrer">Peter Weinberg</a>
         </div>
       </div>
     </div>
