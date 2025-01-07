@@ -9,7 +9,8 @@
     "react-scripts": "^3.0.1"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.16.7"
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "typescript": "^3.9.10"
   },
   "scripts": {
     "start": "react-scripts start",
