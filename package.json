@@ -8,11 +8,6 @@
     "react-dom": "^19.0.0",
     "react-scripts": "^5.0.1"
   },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
-    "@babel/plugin-transform-private-methods": "^7.25.9",
-    "typescript": "^3.9.10"
-  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
