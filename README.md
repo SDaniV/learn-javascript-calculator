@@ -1,0 +1,1 @@
+The purpose of this project is educational to learn FE development basics and complete one of FreeCodeCamp projects. More information can be found here: https://www.freecodecamp.org/learn/front-end-development-libraries/front-end-development-libraries-projects/build-a-javascript-calculator
