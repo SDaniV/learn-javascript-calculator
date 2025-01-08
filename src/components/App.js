@@ -3,140 +3,95 @@ import './App.css';
 import React, { useEffect, useState } from 'react';
 
 const App = (props) => {
-  const operations = ['+', '-', '*', '/'];
+  const [answer, setAnswer] = useState("");
+  const [expression, setExpression] = useState("");
+  const et = expression.trim();
 
-  const [formula, setFormula] = useState([]);
-  const [output, setOutput] = useState("0");
-  const [reset, setReset] = useState(false);
+  const isOperator = (symbol) => {
+    return /[*/+-]/.test(symbol);
+  };
 
-  const updateLastElement = (newElement) => {
-    if (formula.length === 0) {
-      setFormula([newElement]);
-      return;
+  const calculate = () => {
+    // if last char is an operator, do nothing
+    if (isOperator(et.charAt(et.length - 1))) return;
+    // clean the expression so that two operators in a row uses the last operator
+    // 5 * - + 5 = 10
+    const parts = et.split(" ");
+    const newParts = [];
+
+    // go through parts backwards
+    for (let i = parts.length - 1; i >= 0; i--) {
+      if (["*", "/", "+"].includes(parts[i]) && isOperator(parts[i - 1])) {
+        newParts.unshift(parts[i]);
+        let j = 0;
+        let k = i - 1;
+        while (isOperator(parts[k])) {
+          k--;
+          j++;
+        }
+        i -= j;
+      } else {
+        newParts.unshift(parts[i]);
+      }
     }
-    const newFormula = [...formula];
-    newFormula[newFormula.length - 1] += newElement;
-    setFormula(newFormula);
-  }
-
-  const handleDotClick = (e) => {
-    if (output.includes(".")) { return; }
-    const newFormula = [...formula];
-    newFormula[newFormula.length - 1] += e;
-    setFormula(newFormula);
-    setOutput(output + e);
-  }
-
-  const handleClick = (e) => {
-    // Creates a new formula array
-    // Changes the output to the value of the button clicked if it was 0
-    // Otherwise, appends the value of the button clicked to the output
-    let newOutput = output;
-    if (output === "0" && e !== "." ) {
-      newOutput = e;
+    const newExpression = newParts.join(" ");
+    if (isOperator(newExpression.charAt(0))) {
+      setAnswer(eval(answer + newExpression));
     } else {
-      newOutput += e;
+      setAnswer(eval(newExpression));
     }
+    setExpression("");
+  };
 
-    if (operations.includes(formula.at(-1)) && operations.includes(e)) { 
-      updateLastElement(e);
-      return;
-    }
-
-    if (output === "0" || operations.includes(output)) {
-      setOutput("");
-    }
-
-    if (operations.includes(e) || operations.includes(formula.at(-1))) {
-      setOutput(e);
-      setFormula([...formula, e]);
+  const handleClick = (symbol) => {
+    if (symbol === "clear") {
+      setAnswer("");
+      setExpression("0");
+    } else if (symbol === "negative") {
+      console.log("Here")
+      if (answer === "") return;
+      setAnswer(
+        answer.toString().charAt(0) === "-" ? answer.slice(1) : "-" + answer
+      );
+    } else if (symbol === "percent") {
+      if (answer === "") return;
+      setAnswer((parseFloat(answer) / 100).toString());
+    } else if (isOperator(symbol)) {
+      setExpression(et + " " + symbol + " ");
+    } else if (symbol === "=") {
+      calculate();
+    } else if (symbol === "0") {
+      if (expression.charAt(0) !== "0") {
+        setExpression(expression + symbol);
+      }
+    } else if (symbol === ".") {
+      // split by operators and get last number
+      const lastNumber = expression.split(/[-+*/]/g).pop();
+      if (!lastNumber) return;
+      console.log("lastNumber :>> ", lastNumber);
+      // if last number already has a decimal, don't add another
+      if (lastNumber?.includes(".")) return;
+      setExpression(expression + symbol);
     } else {
-      setOutput(newOutput);
-      updateLastElement(e);
-    }
-  }
-
-  const calculateMultiplyNDivide = (f) => {
-    let newFormula = [...f];
-    for (let i = 0; i < newFormula.length; i++) {
-      if (newFormula[i] === "*") {
-        newFormula[i - 1] = newFormula[i - 1] * newFormula[i + 1];
-        newFormula.splice(i, 2);
-        i--;
-      } else if (newFormula[i] === "/") {
-        newFormula[i - 1] = newFormula[i - 1] / newFormula[i + 1];
-        newFormula.splice(i, 2);
-        i--;
+      if (expression.charAt(0) === "0") {
+        setExpression(expression.slice(1) + symbol);
+      } else {
+        setExpression(expression + symbol);
       }
     }
-    return newFormula;
-  }
-
-  const calculateAdditionNSubtraction = (f) => {
-    let result = f[0];
-    for (let i = 0; i <= f.length; i++) {
-      switch (f[i]) {
-        case "+":
-          result = result + f[i + 1];
-          break;
-        case "-":
-          result = result - f[i + 1];
-          break;
-        default:
-          break;
-      }
-    }
-    return result;
-  }
-
-  const handleEqualsOperator = () => {
-    // If the formula is empty, return
-    if (formula.length === 0) { return; }
-    
-    let formulaConvertedFromStrToNum = formula.map((el) => {
-      if (operations.includes(el)) {
-        return el;
-      }
-      return parseFloat(el);
-    });
-
-    let updatedFormula = calculateMultiplyNDivide(formulaConvertedFromStrToNum);
-
-    // If the formula is only one number, return
-    if (updatedFormula.length === 1) {
-      setOutput(updatedFormula[0]);
-      return;
-    }
-
-    let result = calculateAdditionNSubtraction(updatedFormula)
-
-    setOutput(result);
-    setFormula([result]);
-  }
-
-  useEffect(() => {
-    if (reset) {
-      // Perform any operations that should happen after reset
-      console.log("Reset complete");
-      console.log("AC clicked: ", formula);
-      setReset(false);
-    }
-  }, [formula, output, reset]);
-
-  const handleAC = () => {
-    setFormula([]);
-    setOutput("0");
-    setReset(true);
-  }
+  };
 
   return (
     <div id="app">
       <div>
         <div className="calculator">
-          <div className="formulaScreen">{formula}</div>
-          <div className="outputScreen" id="display">{output}</div>
+          <div id="display" style={{ textAlign: "right"}}>
+            <div className="formulaScreen" id="a">{answer}</div>
+            {/* <div className="outputScreen" id="display">{output}</div> */}
+            <div className="outputScreen" id="expression">{expression}</div>
+          </div>
           <div>
-            <button className="jumbo" id="clear" value="AC" onClick={() => handleAC()} style={{background: "rgb(172, 57, 57)"}}>AC</button>
+            <button className="jumbo" id="clear" value="AC" onClick={() => handleClick("clear")} style={{background: "rgb(172, 57, 57)"}}>AC</button>
             <button id="divide" value="/" onClick={() => handleClick('/')} style={{background: "rgb(102, 102, 102)"}}>/</button>
             <button id="multiply" value="x" onClick={() => handleClick('*')} style={{background: "rgb(102, 102, 102)"}}>x</button>
             <button id="seven" value="7" onClick={() => handleClick("7")}>7</button>
@@ -151,8 +106,8 @@ const App = (props) => {
             <button id="two" value="2" onClick={() => handleClick("2")}>2</button>
             <button id="three" value="3" onClick={() => handleClick("3")}>3</button>
             <button className="jumbo" id="zero" value="0" onClick={() => handleClick("0")}>0</button>
-            <button id="decimal" value="." onClick={() => handleDotClick('.')}>.</button>
-            <button id="equals" value="=" onClick={() => handleEqualsOperator()} style={{background: "rgb(0, 68, 102)", position: "absolute", height: "130px", bottom: "5px"}}>=</button>
+            <button id="decimal" value="." onClick={() => handleClick('.')}>.</button>
+            <button id="equals" value="=" onClick={() => handleClick("=")} style={{background: "rgb(0, 68, 102)", position: "absolute", height: "130px", bottom: "5px"}}>=</button>
           </div>
         </div>
         <div className="author">
