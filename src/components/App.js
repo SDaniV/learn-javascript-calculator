@@ -1,11 +1,11 @@
 import './App.css';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const App = (props) => {
   const [answer, setAnswer] = useState("");
-  const [expression, setExpression] = useState("");
-  const et = expression.trim();
+  const [output, setOutput] = useState("");
+  const ot = output.trim();
 
   const isOperator = (symbol) => {
     return /[*/+-]/.test(symbol);
@@ -13,10 +13,10 @@ const App = (props) => {
 
   const calculate = () => {
     // if last char is an operator, do nothing
-    if (isOperator(et.charAt(et.length - 1))) return;
-    // clean the expression so that two operators in a row uses the last operator
+    if (isOperator(ot.charAt(ot.length - 1))) return;
+    // clean the output so that two operators in a row uses the last operator
     // 5 * - + 5 = 10
-    const parts = et.split(" ");
+    const parts = ot.split(" ");
     const newParts = [];
 
     // go through parts backwards
@@ -34,50 +34,42 @@ const App = (props) => {
         newParts.unshift(parts[i]);
       }
     }
-    const newExpression = newParts.join(" ");
-    if (isOperator(newExpression.charAt(0))) {
-      setAnswer(eval(answer + newExpression));
-    } else {
-      setAnswer(eval(newExpression));
-    }
-    setExpression("");
+    const newoutput = newParts.join(" ");
+    isOperator(newoutput.charAt(0)) ? setAnswer(eval(answer + newoutput)) : setAnswer(eval(newoutput));
+    setOutput("");
   };
 
   const handleClick = (symbol) => {
-    if (symbol === "clear") {
-      setAnswer("");
-      setExpression("0");
-    } else if (symbol === "negative") {
-      console.log("Here")
-      if (answer === "") return;
-      setAnswer(
-        answer.toString().charAt(0) === "-" ? answer.slice(1) : "-" + answer
-      );
-    } else if (symbol === "percent") {
-      if (answer === "") return;
-      setAnswer((parseFloat(answer) / 100).toString());
-    } else if (isOperator(symbol)) {
-      setExpression(et + " " + symbol + " ");
-    } else if (symbol === "=") {
-      calculate();
-    } else if (symbol === "0") {
-      if (expression.charAt(0) !== "0") {
-        setExpression(expression + symbol);
-      }
-    } else if (symbol === ".") {
-      // split by operators and get last number
-      const lastNumber = expression.split(/[-+*/]/g).pop();
-      if (!lastNumber) return;
-      console.log("lastNumber :>> ", lastNumber);
-      // if last number already has a decimal, don't add another
-      if (lastNumber?.includes(".")) return;
-      setExpression(expression + symbol);
-    } else {
-      if (expression.charAt(0) === "0") {
-        setExpression(expression.slice(1) + symbol);
-      } else {
-        setExpression(expression + symbol);
-      }
+    switch(symbol) {
+      case "clear":
+        setAnswer("");
+        setOutput("0");
+        break;
+      case "percent":
+        if (answer === "") return;
+        setAnswer((parseFloat(answer) / 100).toString());
+        break;
+      case "=":
+        calculate();
+        break;
+      case "0":
+        if (output.charAt(0) !== "0") {
+          setOutput(output + symbol);
+        }
+        break;
+      case ".":
+        const lastNumber = output.split(/[-+*/]/g).pop();
+        if (!lastNumber) return;
+        if (lastNumber?.includes(".")) return;
+        setOutput(output + symbol);
+        break;
+      default:
+        if (isOperator(symbol)) {
+          setOutput(ot + " " + symbol + " ");
+        } else {
+          output.charAt(0) === "0" ? setOutput(output.slice(1) + symbol) : setOutput(output + symbol);
+        }
+        break;
     }
   };
 
@@ -86,9 +78,8 @@ const App = (props) => {
       <div>
         <div className="calculator">
           <div id="display" style={{ textAlign: "right"}}>
-            <div className="formulaScreen" id="a">{answer}</div>
-            {/* <div className="outputScreen" id="display">{output}</div> */}
-            <div className="outputScreen" id="expression">{expression}</div>
+            <div className="formulaScreen" id="answer">{answer}</div>
+            <div className="outputScreen" id="output">{output}</div>
           </div>
           <div>
             <button className="jumbo" id="clear" value="AC" onClick={() => handleClick("clear")} style={{background: "rgb(172, 57, 57)"}}>AC</button>
